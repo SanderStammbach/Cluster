@@ -24,9 +24,9 @@ T_h = w0/(np.log(2))   # temp Einheit von  hb*omega durch kb
 
 T_c = 1.2
 
-N=10 # Größe Hilbertraum von vibronic system
+N=30 # Größe Hilbertraum von vibronic system
 
-tlist = np.linspace(0, 20, 18 )
+tlist = np.linspace(0, 3000, 2000 )
 
 #Bolzman verteilung funktion(frequenz, inv temp)
 def nb(w, T):
@@ -131,16 +131,13 @@ def ergotropy_t(H, rho_t, timelist):
     # Eigenwerte von rho absteigend (r↓), Eigenwerte von H aufsteigend (ε↑)
     # Eigenwerte und Eigenvektoren des Hamiltonians
 
-    #um modulo unüberinstimmungen zu umgehen<
-    #timelist = range(len(rho_t))
-
     e_vals, e_vecs = H.eigenstates()        
     zipH = zip(e_vals, e_vecs)
     sorted_zipH = sorted(zipH, key=lambda z: z[0], reverse=False)
     sorted_e_vals, sorted_e_vecs = zip(*sorted_zipH)
-    rho_t_part=[rho.ptrace(2) for rho in rho_t]
+    #rho_t_part=[rho.ptrace(2) for rho in rho_t]
     ergotropy_list = []
-
+    print(len(rho_t),len(timelist))
     
     for idx, t in enumerate(timelist):
         rho_full = rho_t[idx]
@@ -408,7 +405,7 @@ else:
 
 #immer time evolution und steadystate
 tlist_plot=[t for i, t in enumerate(tlist) if i % 3 ==0]
-print(tlist_plot)
+
 
 ergo_2_t = ergotropy_t(H_2_free, results[0], tlist_plot)
 ergo_2_ss=ergotropy_ss(H_2_free,RHOS_ss[0])
@@ -442,9 +439,7 @@ ergo_9_ss=ergotropy_ss(H_9_free,RHOS_ss[7])"""
 
 fig, ax = plt.subplots(1, 1, figsize=(8, 6))
 #Missmatch der länge beheben
-"""min_len = min(len(tlist_plot), len(ergo_2_t))
-tlist_plot = tlist_plot[:min_len]
-ergo_2_t = ergo_2_t[:min_len]"""
+
 
 ax.plot(tlist_plot, ergo_2_t, label=r"$n=2$", color="darkviolet")
 ax.hlines(ergo_2_ss, xmin=tlist[0], xmax=tlist[-1], color="darkviolet", linestyle="--")
