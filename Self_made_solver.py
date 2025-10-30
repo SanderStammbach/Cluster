@@ -57,8 +57,9 @@ def solve_liouvillian_expm(
         res = expm_multiply(L_sp, v, start=0.0, stop=times0[-1], num=len(tlist), endpoint=True)
         for k, vk in enumerate(res):
             rho = vector_to_operator(Qobj(vk.reshape(-1, 1), dims=vec_dims))
-            states.append(rho)
-            if k % Auslassen==0:
+            #print(k)
+            if k % Auslassen==0 :
+                print(k)
                 states.append(rho)
             #states_red.append(rho.ptrace(2))
             #if expt is not None:
@@ -70,13 +71,14 @@ def solve_liouvillian_expm(
         #if expt is not None:
         #    for i, op in enumerate(e_ops):
         #        expt[i][0] = float(expect(op, rho))
-        for k in range(1, len(tlist)):
+        for k in range(0, len(tlist)):
             dt = tlist[k] - t_prev
             v = expm_multiply(L_sp, v, start=0.0, stop=dt, num=2, endpoint=True)[-1]
             t_prev = tlist[k]
             rho = vector_to_operator(Qobj(v.reshape(-1, 1), dims=vec_dims))
-            states.append(rho)
-            if k % Auslassen==0:
+            #print(k)
+            if k % Auslassen==0 :
+                print(k)
                 states.append(rho)
             #states_red.append(rho.ptrace(2))
             #if expt is not None:
