@@ -1,11 +1,11 @@
 #!/bin/bash
 #SBATCH --job-name=ergotropy
-#SBATCH --time=00:01:00                 # Laufzeitlimit (medium: bis 1-00:00:00 möglich)
+#SBATCH --time=24:00:00                 # Laufzeitlimit (medium: bis 1-00:00:00 möglich)
 #SBATCH --partition=medium              # fat-node[001-008] sind in medium
 #SBATCH --nodes=1
 #SBATCH --ntasks=1                      # EIN Prozess, intern parallelisiert
 #SBATCH --cpus-per-task=36              # 36 CPUs für deinen ProcessPool
-#SBATCH --mem=68G                      # >=468 GiB (fat-node hat ~480000 MB)
+#SBATCH --mem=468G                      # >=468 GiB (fat-node hat ~480000 MB)
 # # Optional: ganze Node exklusiv + voller RAM (falls gewünscht/erlaubt)
 # #SBATCH --exclusive
 # #SBATCH --mem=0
