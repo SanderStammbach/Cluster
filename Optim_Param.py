@@ -95,8 +95,8 @@ def collaps_operators(N,N_Test_Level,T_h,T_c,gamma_c):
     return c_op_list
 
 def grid_maker():
-    vec1 = np.logspace(-4, 1, 30,dtype=np.float64)                     # y-Achse (g/ν)
-    vec2 = np.logspace(-2.7, -0.16 , 30,dtype=np.float64)  # x-Achse (γ_c/ν)
+    vec1 = np.logspace(-4, 1, 260,dtype=np.float64)                     # y-Achse (g/ν)
+    vec2 = np.logspace(-2.7, -0.14 , 260,dtype=np.float64)  # x-Achse (γ_c/ν)
     Z = np.empty((len(vec1), len(vec2)))                  # Z[i,j] = (vec1[i], vec2[j])
 
     for gi in enumerate(vec1):
