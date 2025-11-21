@@ -96,7 +96,7 @@ def collaps_operators(N,N_Test_Level,T_h,T_c,gamma_c):
 
 def grid_maker():
     vec1 = np.logspace(-4, 1, 260,dtype=np.float64)                     # y-Achse (g/ν)
-    vec2 = np.logspace(-2.7, -0.14 , 260,dtype=np.float64)  # x-Achse (γ_c/ν)
+    vec2 = np.logspace(-2.7, -0.16 , 260,dtype=np.float64)  # x-Achse (γ_c/ν)
     Z = np.empty((len(vec1), len(vec2)))                  # Z[i,j] = (vec1[i], vec2[j])
 
     for gi in enumerate(vec1):
@@ -132,7 +132,7 @@ fig = plt.figure(figsize=(7, 7))
 ax = fig.add_subplot(111)
 
 # Titel
-ax.set_title(r"$\langle \rho_{ee} \rangle$", fontsize=18)
+ax.set_title(r"$\langle \rho_{ee} \rangle$", fontsize=20)
 
 # 2D-Gitter
 X, Y = np.meshgrid(vec2, vec1)
@@ -160,11 +160,11 @@ ax.set_xscale('log')
 ax.set_yscale('log')
 
 # Achsenbeschriftungen
-ax.set_xlabel(r"$ \frac{\gamma_c}{\gamma_h}$", fontsize=20)
+ax.set_xlabel(r"$ \frac{\gamma_c}{\gamma_h}$", fontsize=30)
 from matplotlib.ticker import FuncFormatter
 ax.xaxis.set_major_formatter(FuncFormatter(lambda x, pos: f"{x*100:g}"))
-ax.set_ylabel(r"$\frac{g}{\nu}$", fontsize=20, rotation=0, labelpad=40)
-ax.tick_params(axis='both', labelsize=12)
+ax.set_ylabel(r"$\frac{g}{\nu}$", fontsize=30, rotation=0, labelpad=40)
+ax.tick_params(axis='both', labelsize=20)
 
 # Contour bei 0.5
 def fmt(x):
@@ -174,7 +174,7 @@ def fmt(x):
     return rf"{s} " if plt.rcParams["text.usetex"] else f"{s} "
 
 cs = ax.contour(X, Y, Z, levels=[0.5], colors='black', linestyles='--')
-ax.clabel(cs, cs.levels, fmt=fmt, fontsize=10)
+ax.clabel(cs, cs.levels, fmt=fmt, fontsize=15)
 
 # Achsenverhältnis quadratisch
 ax.set_box_aspect(1)
@@ -201,10 +201,10 @@ cax = fig.add_axes([
 ])
 
 cbar = fig.colorbar(pcm, cax=cax)
-cbar.ax.tick_params(labelsize=12)
+cbar.ax.tick_params(labelsize=20)
 # cbar.set_label(r"$\langle \rho_{ee} \rangle$", fontsize=14)
 
-plt.savefig("OccupationProb.png",dpi=300, bbox_inches="tight", pad_inches=0.2)
+plt.savefig("OccupationProb.png",dpi=800, bbox_inches="tight", pad_inches=0.2)
 plt.show()
 
 

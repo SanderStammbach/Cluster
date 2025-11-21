@@ -30,7 +30,8 @@ N=35 # Größe Hilbertraum von vibronic system
 
 #Bolzman verteilung funktion(frequenz, inv temp)
 def nb(w, T):
-    return np.float128(1 / (np.exp((w) /T) - 1))
+
+    return (np.float128(1 / (np.exp((w) /T) - 1)))
 
 
 
@@ -75,7 +76,7 @@ def operators(N,N_Test_Level):
 
     return b ,c, cd, P12,P21,P11,P22,S_z,C_z,C22
 
-
+#print(basis(2,1)*basis(2,0).dag()*basis(2,0)*basis(2,1).dag(),qutip.spin_Jm(1/2)*qutip.spin_Jp(1/2))
 
 def Hamilton(N,N_Test_Level,w0,wcav,λ,g):
     b ,c, cd, P12,P21,P11,P22,S_z,C_z,C22=operators(N,N_Test_Level)
@@ -84,7 +85,7 @@ def Hamilton(N,N_Test_Level,w0,wcav,λ,g):
 
 
 #Function Collaps 
-def collaps_operators(N,N_Test_Level,T_h,T_c,gamma_c,λ):
+def collaps_operators(N,N_Test_Level,T_h,T_c,gamma_c,λ,wcav):
     b ,c, cd, P12,P21,P11,P22,S_z,C_z,C22=operators(N,N_Test_Level)
     c_op_list = []
 
@@ -92,11 +93,13 @@ def collaps_operators(N,N_Test_Level,T_h,T_c,gamma_c,λ):
     c_op_list.append(np.sqrt((nb(w0, T_h)) * gamma_h) * P21)
     c_op_list.append(np.sqrt((nb(v, T_c) + 1) * gamma_c) * (b+λ*P21*P12) )
     c_op_list.append(np.sqrt((nb(v, T_c)) * gamma_c) * (b.dag()+λ*P12*P21) )
+    #c_op_list.append(np.sqrt((nb(wcav, 1) + 1) * gamma_c) * (c) )
+    #c_op_list.append(np.sqrt((nb(wcav, 1)) * gamma_c) * (cd) )
     return c_op_list
 
 def grid_maker():
     vec1 = np.linspace(0, 7, 260,dtype=np.float64)                     # y-Achse (Δ)
-    vec2 = np.linspace(-8, 8 , 260,dtype=np.float64)  # x-Achse (λj)
+    vec2 = np.linspace(-12, 12 ,260,dtype=np.float64)  # x-Achse (λj)
     Z = np.empty((len(vec1), len(vec2)))                  # Z[i,j] = (vec1[i], vec2[j])
 
     for λj in enumerate(vec1):
@@ -105,9 +108,9 @@ def grid_maker():
             Δ=Δi[1]
             λ=λj[1]
             
-            wcav=w0-Δ*λ**2*v
+            wcav=w0-Δ*(λ**2)*v
             H = Hamilton(N, 2, w0, wcav, λ, g)
-            c_ops = collaps_operators(N, 2, T_h, T_c, gamma_c,λ)
+            c_ops = collaps_operators(N, 2, T_h, T_c, gamma_c,λ,wcav)
             b, c, cd, P12, P21, P11, P22, S_z, C_z, C22 = operators(N, 2)
             #if g < 0:#10**(-5.5):
             #    rho_ss = qutip.steadystate(H,c_ops, method='svd',atol=1e-20,rtol=1e-20,maxiter=10000)
@@ -134,7 +137,7 @@ fig = plt.figure(figsize=(7, 7))
 ax = fig.add_subplot(111)
 
 # Titel
-ax.set_title(r"$\langle \rho_{ee} \rangle$", fontsize=18)
+ax.set_title(r"$\langle \rho_{ee} \rangle$", fontsize=20)
 
 # 2D-Gitter
 X, Y = np.meshgrid(vec2, vec1)
@@ -143,7 +146,7 @@ X, Y = np.meshgrid(vec2, vec1)
 norm = colors.TwoSlopeNorm(vmin=Z.min(), vcenter=0.5, vmax=Z.max())
 
 # Plot
-pcm = ax.pcolormesh(X, Y, Z, shading='auto', cmap='PRGn' ,norm=norm)
+pcm = ax.pcolormesh(X, Y, Z, shading='auto', cmap='PRGn')#,norm=norm)
 
 
 class ScaledLogFormatter(LogFormatterMathtext):
@@ -163,11 +166,11 @@ class ScaledLogFormatter(LogFormatterMathtext):
 #ax.set_yscale('log')
 
 # Achsenbeschriftungen
-ax.set_xlabel(r"$ \Delta $", fontsize=20)
+ax.set_xlabel(r"$ \Delta $", fontsize=30)
 from matplotlib.ticker import FuncFormatter
 ax.xaxis.set_major_formatter(FuncFormatter(lambda x, pos: f"{x*1:g}"))
-ax.set_ylabel(r"$\lambda$", fontsize=20, rotation=0, labelpad=40)
-ax.tick_params(axis='both', labelsize=12)
+ax.set_ylabel(r"$\lambda$", fontsize=30, rotation=0, labelpad=40)
+ax.tick_params(axis='both', labelsize=20)
 
 # Contour bei 0.5
 def fmt(x):
@@ -177,7 +180,7 @@ def fmt(x):
     return rf"{s} " if plt.rcParams["text.usetex"] else f"{s} "
 
 cs = ax.contour(X, Y, Z, levels=[0.5], colors='black', linestyles='--')
-ax.clabel(cs, cs.levels, fmt=fmt, fontsize=10)
+ax.clabel(cs, cs.levels, fmt=fmt, fontsize=15)
 
 # Achsenverhältnis quadratisch
 ax.set_box_aspect(1)
@@ -204,10 +207,10 @@ cax = fig.add_axes([
 ])
 
 cbar = fig.colorbar(pcm, cax=cax)
-cbar.ax.tick_params(labelsize=12)
+cbar.ax.tick_params(labelsize=20)
 # cbar.set_label(r"$\langle \rho_{ee} \rangle$", fontsize=14)
 
-plt.savefig("OccupationProb_λΔ.png",dpi=300, bbox_inches="tight", pad_inches=0.2)
+plt.savefig("OccupationProb_nanopart.png",dpi=800, bbox_inches="tight", pad_inches=0.2)
 plt.show()
 
 
