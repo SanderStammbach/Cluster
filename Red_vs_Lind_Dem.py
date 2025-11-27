@@ -29,8 +29,9 @@ T_c = 1.2
 
 
 # --- Zeitachse ---
-tlist = np.linspace(0, 300, 300)
-N=30 # Größe Hilbertraum von vibronic system
+tlist = np.linspace(0, 100, 100)
+
+N=10 # Größe Hilbertraum von vibronic system
 
 
 #Bolzman verteilung funktion(frequenz, inv temp)
@@ -204,22 +205,25 @@ opts = Options(
 res_BR = qt.brmesolve(
     H, rho0, tlist,
     #a_ops=[(sigma_x, S_not_markov),(sigma_x, S_markov)], fuer zweites bad
-    a_ops=[(sigma_x, S_not_markov_hot),(B, S_not_markov_cold)],
+    a_ops=[sigma_x,B],
     e_ops=[P22,C22],
+    spectra_cb=[S_not_markov_hot, S_not_markov_cold ],
     options=opts
       # Säkularapproximation -> Lindblad-Form
 )
 
 # --- Plot ---
 plt.figure(figsize=(8,5))
-plt.plot(tlist, res_L.expect[0], label='Lindblad')
-plt.plot(tlist, res_BR.expect[0], '--', label='Bloch-Redfield (gematcht)')
-plt.plot(tlist, res_L.expect[1], label='Lindblad')
-plt.plot(tlist, res_BR.expect[1], '--', label='Bloch-Redfield (gematcht)')
-plt.xlabel('Zeit')
-plt.ylabel('Population |1>')
-plt.title('Identischer Zerfall: Lindblad = Bloch-Redfield (gematchtes Spektrum)')
-plt.legend()
+plt.plot(tlist, res_L.expect[0] ,color='green', label=r" Lindblad: $ \langle \hat{\rho}_{ee S} \rangle $ ")
+plt.plot(tlist, res_BR.expect[0], '--', color='green',label=r" Bloch-Redfield: $ \langle \hat{\rho}_{ee S} \rangle $ ")
+plt.plot(tlist, res_L.expect[1],color='red', label=r" Lindblad: $ \langle \hat{\rho}_{ee D} \rangle $ ")
+plt.plot(tlist, res_BR.expect[1], '--',color='red', label=r" Bloch-Redfield: $ \langle \hat{\rho}_{ee D} \rangle $ ")
+plt.xlabel(r"$t \nu $",fontsize=20)
+plt.ylabel(r"$\langle \rho_{ee}\rangle $",rotation=0, labelpad=25, fontsize=20)
+plt.tick_params(labelsize=15)
+#plt.title('Identischer Zerfall: Lindblad = Bloch-Redfield (gematchtes Spektrum)')
+plt.legend(fontsize=15)
 plt.grid(True)
+plt.savefig("Red_final.png", dpi=600, bbox_inches="tight")
 plt.show()
 
