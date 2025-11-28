@@ -29,9 +29,9 @@ T_c = 1.2
 
 
 # --- Zeitachse ---
-tlist = np.linspace(0, 100, 100)
+tlist = np.linspace(0, 1000, 1000)
 
-N=10 # Größe Hilbertraum von vibronic system
+N=30 # Größe Hilbertraum von vibronic system
 
 
 #Bolzman verteilung funktion(frequenz, inv temp)

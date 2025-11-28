@@ -24,7 +24,7 @@ T_h = w0/(np.log(2))   # temp Einheit von  hb*omega durch kb
 
 T_c = 1.2
 
-N=10 # Größe Hilbertraum von vibronic system
+N=33 # Größe Hilbertraum von vibronic system
 
 
 #Bolzman verteilung funktion(frequenz, inv temp)
@@ -307,7 +307,7 @@ if __name__ == "__main__":
         (H_6, c_ops_list_6),
         (H_7, c_ops_list_7),
         (H_8, c_ops_list_8),
-        #(H_9, c_ops_list_9),
+        (H_9, c_ops_list_9),
         #(H_10,c_ops_list_10),
         
     ]
@@ -359,6 +359,10 @@ energy_7_ss=Energy_ss(H_7_free,RHOS_ss[5])
 ergo_8_ss=ergotropy_ss(H_8_free,RHOS_ss[6])
 #ergo_5_ss_diag=ergotropy_ss_diag_only(H_4_free,RHOS_ss[2])
 energy_8_ss=Energy_ss(H_8_free,RHOS_ss[6])
+
+ergo_8_ss=ergotropy_ss(H_8_free,RHOS_ss[7])
+#ergo_5_ss_diag=ergotropy_ss_diag_only(H_4_free,RHOS_ss[2])
+energy_8_ss=Energy_ss(H_8_free,RHOS_ss[7])
 #######################################################################################################################
 #Plot
 
@@ -372,11 +376,11 @@ energy_8_ss=Energy_ss(H_8_free,RHOS_ss[6])
 
 
 
-n=np.array([2,3,4,5,6,7,8])
+n=np.array([2,3,4,5,6,7,8,9])
 
-total_energy=[100,100,100,100,100,100,100]
-filled_ergotropy=[ergo_2_ss/wcav*100, ergo_3_ss/(2*wcav)*100, ergo_4_ss/(3*wcav)*100,(ergo_5_ss/(4*wcav))*100,(ergo_6_ss/(5*wcav))*100,(ergo_7_ss/(6*wcav))*100,(ergo_8_ss/(7*wcav))*100]
-filled_energy=[energy_2_ss/wcav*100, energy_3_ss/(2*wcav)*100, energy_4_ss/(3*wcav)*100,energy_5_ss/(4*wcav)*100,energy_6_ss/(5*wcav)*100,energy_7_ss/(6*wcav)*100,energy_8_ss/(7*wcav)*100]
+total_energy=[100,100,100,100,100,100,100,100]
+filled_ergotropy=[ergo_2_ss/wcav*100, ergo_3_ss/(2*wcav)*100, ergo_4_ss/(3*wcav)*100,(ergo_5_ss/(4*wcav))*100,(ergo_6_ss/(5*wcav))*100,(ergo_7_ss/(6*wcav))*100,(ergo_8_ss/(7*wcav))*100,(ergo_9_ss/(8*wcav))*100]
+filled_energy=[energy_2_ss/wcav*100, energy_3_ss/(2*wcav)*100, energy_4_ss/(3*wcav)*100,energy_5_ss/(4*wcav)*100,energy_6_ss/(5*wcav)*100,energy_7_ss/(6*wcav)*100,energy_8_ss/(7*wcav)*100,energy_9_ss/(8*wcav)*100]
 
 
 figSäule, ax =plt.subplots(figsize=(9,6))
@@ -389,6 +393,7 @@ ax.bar(5,filled_ergotropy[3],edgecolor='black',facecolor='springgreen')
 ax.bar(6,filled_ergotropy[4],edgecolor='black',facecolor='gold')
 ax.bar(7,filled_ergotropy[5],edgecolor='black',facecolor='orange')
 ax.bar(8,filled_ergotropy[6],edgecolor='black',facecolor='tomato')
+ax.bar(9,filled_ergotropy[7],edgecolor='black',facecolor='red')
 
 transpa=0.26
 ax.bar(2,filled_energy[0],edgecolor='black',facecolor='darkviolet',alpha=transpa)
@@ -398,10 +403,12 @@ ax.bar(5,filled_energy[3],edgecolor='black',facecolor='springgreen',alpha=transp
 ax.bar(6,filled_energy[4],edgecolor='black',facecolor='gold',alpha=transpa)
 ax.bar(7,filled_energy[5],edgecolor='black',facecolor='orange',alpha=transpa)
 ax.bar(8,filled_energy[6],edgecolor='black',facecolor='tomato',alpha=transpa)
-ax.set_ylabel(r"$\frac{\mathcal{W}_{\mathcal{H}_{free}}(t)} { \nu n \omega_B}$",fontsize=23,rotation=0,labelpad=35  )
-ax.text(-0.105, 0.80, r"$\frac{\mathrm{Tr}[\mathcal{H}_{free} \rho(t)]}{\nu n \omega_B }$", transform=ax.transAxes,rotation=0,fontsize=23, va='bottom', ha='center')
+ax.bar(9,filled_energy[7],edgecolor='black',facecolor='red',alpha=transpa)
+
+ax.set_ylabel(r"$\frac{\mathcal{W}_{\mathcal{H}_{D free}}(t)} {  n \omega_B}$",fontsize=23,rotation=0,labelpad=35  )
+ax.text(-0.105, 0.80, r"$\frac{\mathrm{Tr}[\mathcal{H}_{D free} \rho(t)]}{ n \omega_B }$", transform=ax.transAxes,rotation=0,fontsize=23, va='bottom', ha='center')
 ax.set_xlabel(
-    r"Size of spinsystem $n$",
+    r"Spinsystem-size $n$",
     fontsize=20,
     rotation=0,
     labelpad=20  # Abstand von der Achse
@@ -417,7 +424,7 @@ for i in range(7):
         n[i], 
         filled_ergotropy[i] + total_energy[i] * 0.03,  # leichter Abstand nach oben
         f'{percent:.1f}%', 
-        ha='center', va='bottom', fontsize=15, fontweight='bold'
+        ha='center', va='bottom', fontsize=17, fontweight='bold'
     )
 
 for i in range(7):
@@ -431,7 +438,7 @@ for i in range(7):
         n[i], 
         filled_energy[i] + total_energy[i] * 0.03,  # leichter Abstand nach oben
         f'{percent:.1f}%', 
-        ha='center', va='bottom', fontsize=15, fontweight='bold'
+        ha='center', va='bottom', fontsize=17, fontweight='bold'
     )
 import matplotlib.ticker as mticker
 
@@ -446,5 +453,5 @@ ax.tick_params(left=False)  # entfernt die Tick-Linien
 
 #legend = ax.legend(loc='upper left', frameon=True)
 #legend.get_frame().set_facecolor('white')
-plt.savefig("Battery.png", dpi=1000, bbox_inches="tight")
+plt.savefig("Battery.png", dpi=400, bbox_inches="tight")
 plt.show()

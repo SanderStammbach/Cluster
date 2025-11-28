@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=ergotropy
-#SBATCH --time=5:30:00
-#SBATCH --partition=short
+#SBATCH --time=12:30:00
+#SBATCH --partition=medium
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=36         # statt 12x3 externe Tasks

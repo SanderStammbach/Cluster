@@ -132,7 +132,7 @@ fig = plt.figure(figsize=(7, 7))
 ax = fig.add_subplot(111)
 
 # Titel
-ax.set_title(r"$\langle \rho_{ee} \rangle$", fontsize=20)
+#ax.set_title(r"$\langle \hat{\rho}_{ee D} \rangle$", fontsize=25)
 
 # 2D-Gitter
 X, Y = np.meshgrid(vec2, vec1)
@@ -160,10 +160,10 @@ ax.set_xscale('log')
 ax.set_yscale('log')
 
 # Achsenbeschriftungen
-ax.set_xlabel(r"$ \frac{\gamma_c}{\gamma_h}$", fontsize=30)
+ax.set_xlabel(r"$ \gamma_c / \gamma_h $", fontsize=30)
 from matplotlib.ticker import FuncFormatter
 ax.xaxis.set_major_formatter(FuncFormatter(lambda x, pos: f"{x*100:g}"))
-ax.set_ylabel(r"$\frac{g}{\nu}$", fontsize=30, rotation=0, labelpad=40)
+ax.set_ylabel(r"$ g / \nu$", fontsize=30, rotation=0, labelpad=40)
 ax.tick_params(axis='both', labelsize=20)
 
 # Contour bei 0.5
@@ -174,7 +174,7 @@ def fmt(x):
     return rf"{s} " if plt.rcParams["text.usetex"] else f"{s} "
 
 cs = ax.contour(X, Y, Z, levels=[0.5], colors='black', linestyles='--')
-ax.clabel(cs, cs.levels, fmt=fmt, fontsize=15)
+ax.clabel(cs, cs.levels, fmt=fmt, fontsize=17)
 
 # Achsenverhältnis quadratisch
 ax.set_box_aspect(1)
@@ -200,11 +200,11 @@ cax = fig.add_axes([
     pos.height * shrink                            # Höhe
 ])
 
-cbar = fig.colorbar(pcm, cax=cax)
-cbar.ax.tick_params(labelsize=20)
+#cbar = fig.colorbar(pcm, cax=cax)
+#cbar.ax.tick_params(labelsize=20)
 # cbar.set_label(r"$\langle \rho_{ee} \rangle$", fontsize=14)
 
-plt.savefig("OccupationProb.png",dpi=800, bbox_inches="tight", pad_inches=0.2)
+plt.savefig("OccupationProb.png",dpi=400, bbox_inches="tight", pad_inches=0.2)
 plt.show()
 
 

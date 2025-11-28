@@ -137,7 +137,7 @@ fig = plt.figure(figsize=(7, 7))
 ax = fig.add_subplot(111)
 
 # Titel
-ax.set_title(r"$\langle \rho_{ee} \rangle$", fontsize=20)
+#ax.set_title(r"$\langle \hat{\rho}_{ee D} \rangle$", fontsize=25)
 
 # 2D-Gitter
 X, Y = np.meshgrid(vec2, vec1)
@@ -146,7 +146,7 @@ X, Y = np.meshgrid(vec2, vec1)
 norm = colors.TwoSlopeNorm(vmin=Z.min(), vcenter=0.5, vmax=Z.max())
 
 # Plot
-pcm = ax.pcolormesh(X, Y, Z, shading='auto', cmap='PRGn')#,norm=norm)
+pcm = ax.pcolormesh(X, Y, Z, shading='auto', cmap='PRGn',norm=norm)
 
 
 class ScaledLogFormatter(LogFormatterMathtext):
@@ -180,7 +180,7 @@ def fmt(x):
     return rf"{s} " if plt.rcParams["text.usetex"] else f"{s} "
 
 cs = ax.contour(X, Y, Z, levels=[0.5], colors='black', linestyles='--')
-ax.clabel(cs, cs.levels, fmt=fmt, fontsize=15)
+ax.clabel(cs, cs.levels, fmt=fmt, fontsize=17)
 
 # Achsenverhältnis quadratisch
 ax.set_box_aspect(1)
@@ -208,9 +208,9 @@ cax = fig.add_axes([
 
 cbar = fig.colorbar(pcm, cax=cax)
 cbar.ax.tick_params(labelsize=20)
-# cbar.set_label(r"$\langle \rho_{ee} \rangle$", fontsize=14)
+cbar.set_label(r"$ P_e^B $", fontsize=14)
 
-plt.savefig("OccupationProb_nanopart.png",dpi=800, bbox_inches="tight", pad_inches=0.2)
+plt.savefig("OccupationProb_λΔ.png",dpi=400, bbox_inches="tight", pad_inches=0.2)
 plt.show()
 
 
