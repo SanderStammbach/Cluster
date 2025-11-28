@@ -173,7 +173,7 @@ def fmt(x):
         s = f"{x:.0f}"
     return rf"{s} " if plt.rcParams["text.usetex"] else f"{s} "
 
-cs = ax.contour(X, Y, Z, levels=[0.5], colors='black', linestyles='--')
+cs = ax.contour(X, Y, Z, levels=[0.5], colors='black', linestyles='--',fontsize=17)
 ax.clabel(cs, cs.levels, fmt=fmt, fontsize=17)
 
 # Achsenverhältnis quadratisch
@@ -191,7 +191,7 @@ pos = ax.get_position()
 pad = 0.03       # horizontaler Abstand (in Figure-Koordinaten)
 width = 0.035      # Breite der Colorbar (in Figure-Koordinaten)
 shrink = 0.96     # wie viel Prozent der Achsenhöhe die Bar haben soll (optisch perfekt)
-
+"""
 # Colorbar exakt ausgerichtet an Achse
 cax = fig.add_axes([
     pos.x1 + pad,                                  # Start rechts vom Plot
@@ -200,10 +200,10 @@ cax = fig.add_axes([
     pos.height * shrink                            # Höhe
 ])
 
-#cbar = fig.colorbar(pcm, cax=cax)
-#cbar.ax.tick_params(labelsize=20)
-# cbar.set_label(r"$\langle \rho_{ee} \rangle$", fontsize=14)
-
+cbar = fig.colorbar(pcm, cax=cax)
+cbar.ax.tick_params(labelsize=20)
+cbar.set_label(r"$\langle \rho_{ee} \rangle$", fontsize=14)
+"""
 plt.savefig("OccupationProb.png",dpi=400, bbox_inches="tight", pad_inches=0.2)
 plt.show()
 

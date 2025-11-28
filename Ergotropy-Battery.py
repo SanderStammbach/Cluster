@@ -360,9 +360,9 @@ ergo_8_ss=ergotropy_ss(H_8_free,RHOS_ss[6])
 #ergo_5_ss_diag=ergotropy_ss_diag_only(H_4_free,RHOS_ss[2])
 energy_8_ss=Energy_ss(H_8_free,RHOS_ss[6])
 
-ergo_8_ss=ergotropy_ss(H_8_free,RHOS_ss[7])
+ergo_9_ss=ergotropy_ss(H_9_free,RHOS_ss[7])
 #ergo_5_ss_diag=ergotropy_ss_diag_only(H_4_free,RHOS_ss[2])
-energy_8_ss=Energy_ss(H_8_free,RHOS_ss[7])
+energy_9_ss=Energy_ss(H_9_free,RHOS_ss[7])
 #######################################################################################################################
 #Plot
 
@@ -383,7 +383,7 @@ filled_ergotropy=[ergo_2_ss/wcav*100, ergo_3_ss/(2*wcav)*100, ergo_4_ss/(3*wcav)
 filled_energy=[energy_2_ss/wcav*100, energy_3_ss/(2*wcav)*100, energy_4_ss/(3*wcav)*100,energy_5_ss/(4*wcav)*100,energy_6_ss/(5*wcav)*100,energy_7_ss/(6*wcav)*100,energy_8_ss/(7*wcav)*100,energy_9_ss/(8*wcav)*100]
 
 
-figSäule, ax =plt.subplots(figsize=(9,6))
+figSäule, ax =plt.subplots(figsize=(11,6))
 
 ax.bar(n,total_energy, edgecolor='black',facecolor='none')
 ax.bar(2,filled_ergotropy[0],edgecolor='black',facecolor='darkviolet')
@@ -405,15 +405,15 @@ ax.bar(7,filled_energy[5],edgecolor='black',facecolor='orange',alpha=transpa)
 ax.bar(8,filled_energy[6],edgecolor='black',facecolor='tomato',alpha=transpa)
 ax.bar(9,filled_energy[7],edgecolor='black',facecolor='red',alpha=transpa)
 
-ax.set_ylabel(r"$\frac{\mathcal{W}_{\mathcal{H}_{D free}}(t)} {  n \omega_B}$",fontsize=23,rotation=0,labelpad=35  )
-ax.text(-0.105, 0.80, r"$\frac{\mathrm{Tr}[\mathcal{H}_{D free} \rho(t)]}{ n \omega_B }$", transform=ax.transAxes,rotation=0,fontsize=23, va='bottom', ha='center')
+ax.set_ylabel(r"$\frac{\mathcal{W}_{\mathcal{H}_{B free}}(t)} {  n \omega_B}$",fontsize=23,rotation=0,labelpad=35  )
+ax.text(-0.090, 0.80, r"$\frac{\mathrm{Tr}[\mathcal{H}_{B free} \rho(t)]}{ n \omega_B }$", transform=ax.transAxes,rotation=0,fontsize=23, va='bottom', ha='center')
 ax.set_xlabel(
     r"Spinsystem-size $n$",
     fontsize=20,
     rotation=0,
     labelpad=20  # Abstand von der Achse
 )
-for i in range(7):
+for i in range(8):
     #ax.bar(n[i], filled_ergotropy[i], edgecolor='black', facecolor=colors[i])
     
     # Prozent berechnen
@@ -424,10 +424,10 @@ for i in range(7):
         n[i], 
         filled_ergotropy[i] + total_energy[i] * 0.03,  # leichter Abstand nach oben
         f'{percent:.1f}%', 
-        ha='center', va='bottom', fontsize=17, fontweight='bold'
+        ha='center', va='bottom', fontsize=16, fontweight='bold'
     )
 
-for i in range(7):
+for i in range(8):
     #ax.bar(n[i], filled_ergotropy[i], edgecolor='black', facecolor=colors[i])
     
     # Prozent berechnen

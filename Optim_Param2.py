@@ -208,7 +208,7 @@ cax = fig.add_axes([
 
 cbar = fig.colorbar(pcm, cax=cax)
 cbar.ax.tick_params(labelsize=20)
-cbar.set_label(r"$ P_e^B $", fontsize=14)
+cbar.set_label(r"$ P_e^B $", fontsize=25,rotation=0,labelpad=20)
 
 plt.savefig("OccupationProb_λΔ.png",dpi=400, bbox_inches="tight", pad_inches=0.2)
 plt.show()
