@@ -444,7 +444,7 @@ fig, ax = plt.subplots(1, 1, figsize=(8, 6))
 ax.plot(tlist_plot, ergo_2_t, label=r"$n=2$", color="darkviolet")
 ax.hlines(ergo_2_ss, xmin=tlist[0], xmax=tlist[-1], color="darkviolet", linestyle="--")
 ax.axvline(x=1/gamma_h, color='k', linestyle='--',alpha=0.6)
-ax.text(1/gamma_h, 1.02, r"$\frac{1}{\gamma_h}$", transform=ax.get_xaxis_transform(), ha='center', va='bottom', color='black', fontsize=17)
+ax.text(1/gamma_h, 1.02, r"$ 1 /\gamma_h$", transform=ax.get_xaxis_transform(), ha='center', va='bottom', color='black', fontsize=17)
 
 
 
@@ -489,12 +489,12 @@ ax.text(8/gamma_h, 1.02, r"$\frac{8}{\gamma_h}$", transform=ax.get_xaxis_transfo
 ax.set_xscale('log')
 ax.set_xlim(left=1e1)
 
-ax.set_xlabel(r"$ t \nu$",fontsize=14)
+ax.set_xlabel(r"$ t \nu$",fontsize=25)
 ax.set_ylabel(
-    r"$\frac{\mathcal{W}_{\mathcal{H}_{free}}(t)} { \nu}$",
-    fontsize=20,
+    r"$\mathcal{W}_{B}(t) / \nu$",
+    fontsize=25,
     rotation=0,
-    labelpad=25  # Abstand von der Achse
+    labelpad=40  # Abstand von der Achse
 )
 
 #ax.set_title("Ergotropy als Funktion der Zeit")
@@ -503,7 +503,7 @@ ax.set_ylabel(
 ax.grid(True, which="both", linestyle=":", linewidth=0.8)
 legend = ax.legend(loc='upper left', frameon=True,fontsize=17)
 legend.get_frame().set_facecolor('white')
-ax.tick_params(axis='both', labelsize=20)
+ax.tick_params(axis='both', labelsize=17)
 plt.savefig("Plot_Ergotropy_Hfree-N_2-8.png",dpi=300, bbox_inches="tight")
 plt.show()
 
