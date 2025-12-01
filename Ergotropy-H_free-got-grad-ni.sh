@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=ergotropy
-#SBATCH --time=01:30:00
-#SBATCH --partition=short
+#SBATCH --time=30:00:00
+#SBATCH --partition=long
 #SBATCH --nodes=1
 #SBATCH --ntasks=1                 # interne Parallelisierung -> 1 Task
 #SBATCH --cpus-per-task=36         # 36 Kerne für deinen ProcessPool

@@ -444,40 +444,40 @@ fig, ax = plt.subplots(1, 1, figsize=(8, 6))
 ax.plot(tlist_plot, ergo_2_t, label=r"$n=2$", color="darkviolet")
 ax.hlines(ergo_2_ss, xmin=tlist[0], xmax=tlist[-1], color="darkviolet", linestyle="--")
 ax.axvline(x=1/gamma_h, color='k', linestyle='--',alpha=0.6)
-ax.text(1/gamma_h, 1.02, r"$\frac{1}{\gamma_h}$", transform=ax.get_xaxis_transform(), ha='center', va='bottom', color='black', fontsize=14)
+ax.text(1/gamma_h, 1.02, r"$\frac{1}{\gamma_h}$", transform=ax.get_xaxis_transform(), ha='center', va='bottom', color='black', fontsize=17)
 
 
 
 
 ax.plot(tlist_plot, ergo_3_t, label=r"$n=3$", color="blue")
 ax.hlines(ergo_3_ss, xmin=tlist[0], xmax=tlist[-1], color="blue", linestyle="--")
-ax.axvline(x=2/gamma_h, color='k', linestyle='--',alpha=0.6)
-ax.text(2/gamma_h, 1.02, r"$\frac{2}{\gamma_h}$", transform=ax.get_xaxis_transform(), ha='center', va='bottom', color='black', fontsize=14)
+#ax.axvline(x=2/gamma_h, color='k', linestyle='--',alpha=0.6)
+#ax.text(2/gamma_h, 1.02, r"$\frac{2}{\gamma_h}$", transform=ax.get_xaxis_transform(), ha='center', va='bottom', color='black', fontsize=14)
 
 ax.plot(tlist_plot, ergo_4_t, label=r"$n=4$", color="cyan")
 ax.hlines(ergo_4_ss, xmin=tlist[0], xmax=tlist[-1], color="cyan", linestyle="--")
-ax.axvline(x=3/gamma_h, color='k', linestyle='--',alpha=0.6)
-ax.text(3/gamma_h, 1.02, r"$\frac{3}{\gamma_h}$", transform=ax.get_xaxis_transform(), ha='center', va='bottom', color='black', fontsize=14)
+#ax.axvline(x=3/gamma_h, color='k', linestyle='--',alpha=0.6)
+#ax.text(3/gamma_h, 1.02, r"$\frac{3}{\gamma_h}$", transform=ax.get_xaxis_transform(), ha='center', va='bottom', color='black', fontsize=14)
 
 ax.plot(tlist_plot, ergo_5_t, label=r"$n=5$", color="springgreen")
 ax.hlines(ergo_5_ss, xmin=tlist[0], xmax=tlist[-1], color="springgreen", linestyle="--")
-ax.axvline(x=4/gamma_h, color='k', linestyle='--',alpha=0.6)
-ax.text(4/gamma_h, 1.02, r"$\frac{4}{\gamma_h}$", transform=ax.get_xaxis_transform(), ha='center', va='bottom', color='black', fontsize=14)
+#ax.axvline(x=4/gamma_h, color='k', linestyle='--',alpha=0.6)
+#ax.text(4/gamma_h, 1.02, r"$\frac{4}{\gamma_h}$", transform=ax.get_xaxis_transform(), ha='center', va='bottom', color='black', fontsize=14)
 
 ax.plot(tlist_plot, ergo_6_t, label=r"$n=6$", color="gold")
 ax.hlines(ergo_6_ss, xmin=tlist[0], xmax=tlist[-1], color="gold", linestyle="--")
-ax.axvline(x=5/gamma_h, color='k', linestyle='--',alpha=0.6)
-ax.text(5/gamma_h, 1.02, r"$\frac{5}{\gamma_h}$", transform=ax.get_xaxis_transform(), ha='center', va='bottom', color='black', fontsize=14)
+#ax.axvline(x=5/gamma_h, color='k', linestyle='--',alpha=0.6)
+#ax.text(5/gamma_h, 1.02, r"$\frac{5}{\gamma_h}$", transform=ax.get_xaxis_transform(), ha='center', va='bottom', color='black', fontsize=14)
 
 ax.plot(tlist_plot, ergo_7_t, label=r"$n=7$", color="orange")
 ax.hlines(ergo_7_ss, xmin=tlist[0], xmax=tlist[-1], color="orange", linestyle="--")
-ax.axvline(x=6/gamma_h, color='k', linestyle='--',alpha=0.6)
-ax.text(6/gamma_h, 1.02, r"$\frac{6}{\gamma_h}$", transform=ax.get_xaxis_transform(), ha='center', va='bottom', color='black', fontsize=14)
+#ax.axvline(x=6/gamma_h, color='k', linestyle='--',alpha=0.6)
+#ax.text(6/gamma_h, 1.02, r"$\frac{6}{\gamma_h}$", transform=ax.get_xaxis_transform(), ha='center', va='bottom', color='black', fontsize=14)
 
 ax.plot(tlist_plot, ergo_8_t, label=r"$n=8$", color="tomato")
 ax.hlines(ergo_8_ss, xmin=tlist[0], xmax=tlist[-1], color="tomato", linestyle="--")
-ax.axvline(x=7/gamma_h, color='k', linestyle='--',alpha=0.6)
-ax.text(7/gamma_h, 1.02, r"$\frac{7}{\gamma_h}$", transform=ax.get_xaxis_transform(), ha='center', va='bottom', color='black', fontsize=14)
+#ax.axvline(x=7/gamma_h, color='k', linestyle='--',alpha=0.6)
+#ax.text(7/gamma_h, 1.02, r"$\frac{7}{\gamma_h}$", transform=ax.get_xaxis_transform(), ha='center', va='bottom', color='black', fontsize=14)
 
 
 """ax.plot(tlist_plot, ergo_9_t, label=r"$n=9$", color="red")
@@ -492,17 +492,18 @@ ax.set_xlim(left=1e1)
 ax.set_xlabel(r"$ t \nu$",fontsize=14)
 ax.set_ylabel(
     r"$\frac{\mathcal{W}_{\mathcal{H}_{free}}(t)} { \nu}$",
-    fontsize=14,
+    fontsize=20,
     rotation=0,
-    labelpad=20  # Abstand von der Achse
+    labelpad=25  # Abstand von der Achse
 )
 
 #ax.set_title("Ergotropy als Funktion der Zeit")
 
 
 ax.grid(True, which="both", linestyle=":", linewidth=0.8)
-legend = ax.legend(loc='upper left', frameon=True)
+legend = ax.legend(loc='upper left', frameon=True,fontsize=17)
 legend.get_frame().set_facecolor('white')
+ax.tick_params(axis='both', labelsize=20)
 plt.savefig("Plot_Ergotropy_Hfree-N_2-8.png",dpi=300, bbox_inches="tight")
 plt.show()
 
