@@ -1,0 +1,9 @@
+Traceback (most recent call last):
+  File "Ergotropy-H_free.py", line 1, in <module>
+    from qutip import basis, sigmax, sigmaz, sigmay, Options
+  File "/home/u524735/.local/lib/python3.6/site-packages/qutip/__init__.py", line 157, in <module>
+    from qutip.krylovsolve import *
+  File "/home/u524735/.local/lib/python3.6/site-packages/qutip/krylovsolve.py", line 7, in <module>
+    from scipy.optimize import root_scalar
+ImportError: cannot import name 'root_scalar'
+srun: error: fat-node002: task 0: Exited with exit code 1

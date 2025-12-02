@@ -1,0 +1,6 @@
+SLURM_JOB_ID: 10943603
+Partition: medium
+Node(s): fat-node002
+CPUs/Task: 36
+Mem/Node (req): 479232
+Starte Python-Job…

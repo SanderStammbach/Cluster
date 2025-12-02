@@ -494,7 +494,7 @@ ax.set_ylabel(
     r"$\mathcal{W}_{B}(t) / \nu$",
     fontsize=25,
     rotation=0,
-    labelpad=40  # Abstand von der Achse
+    labelpad=60  # Abstand von der Achse
 )
 
 #ax.set_title("Ergotropy als Funktion der Zeit")
