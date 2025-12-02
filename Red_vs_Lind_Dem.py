@@ -146,7 +146,8 @@ c_ops=collaps_operators(N,N_Test_Level,T_h,T_c)
 H=Hamilton(N,N_Test_Level,w0,wcav,λ)
 rho0=rho0_build(N,N_Test_Level)
 res_L = qt.mesolve(H, rho0, tlist, c_ops, e_ops=[P22,C22])
-
+ss=qutip.steadystate(H,c_ops)
+ssB=(ss*C22).tr() 
 # === Bloch-Redfield mit "deltaförmigem" Markov-Spektrum ===
 # S(ω0) = γ (n̄+1), S(-ω0) = γ n̄, sonst 0. -> liefert exakt dieselben Raten wie oben.
 tolh = 50
@@ -221,9 +222,10 @@ plt.plot(tlist, res_BR.expect[1], '--',color='red', label=r" Bloch-Redfield: $ P
 plt.xlabel(r"$t \nu $",fontsize=20)
 plt.ylabel(r"$ P_e $",rotation=0, labelpad=25, fontsize=20)
 plt.tick_params(labelsize=17)
+#plt.axhline(np.abs(ssB),xmin=tlist[0],xmax=tlist[-1])
 #plt.title('Identischer Zerfall: Lindblad = Bloch-Redfield (gematchtes Spektrum)')
 plt.legend(fontsize=17)
 plt.grid(True)
-plt.savefig("Red_final.png", dpi=400, bbox_inches="tight")
+plt.savefig("Red_final.png", dpi=300, bbox_inches="tight")
 plt.show()
 
