@@ -226,6 +226,6 @@ plt.tick_params(labelsize=17)
 #plt.title('Identischer Zerfall: Lindblad = Bloch-Redfield (gematchtes Spektrum)')
 plt.legend(fontsize=17)
 plt.grid(True)
-plt.savefig("Red_final.png", dpi=300, bbox_inches="tight")
+plt.savefig("Red_finalt.png", dpi=300, bbox_inches="tight")
 plt.show()
 
