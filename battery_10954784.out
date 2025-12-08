@@ -1,0 +1,8 @@
+SLURM_JOB_ID: 10954784
+Partition: short
+Node(s): fat-node008
+CPUs/Task: 36
+Mem/Node (req): 479232
+Starte Python-Job…
+1.0
+✅ Trunkierung scheint ausreichend (kein Overflow).

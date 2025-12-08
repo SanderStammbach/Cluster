@@ -24,7 +24,7 @@ T_h = w0/(np.log(2))   # temp Einheit von  hb*omega durch kb
 
 T_c = 1.2
 
-N=39 # Größe Hilbertraum von vibronic system
+N=46 # Größe Hilbertraum von vibronic system
 
 
 #Bolzman verteilung funktion(frequenz, inv temp)
@@ -405,8 +405,10 @@ ax.bar(7,filled_energy[5],edgecolor='black',facecolor='orange',alpha=transpa)
 ax.bar(8,filled_energy[6],edgecolor='black',facecolor='tomato',alpha=transpa)
 ax.bar(9,filled_energy[7],edgecolor='black',facecolor='red',alpha=transpa)
 
-ax.set_ylabel(r"$\frac{\mathcal{W}_{B}(t)} {  n \omega_B}$",fontsize=23,rotation=0,labelpad=35  )
-ax.text(-0.090, 0.80, r"$\frac{\mathrm{Tr}[\mathcal{H}_{B free} \hat{\rho}(t)]}{ n \omega_B }$", transform=ax.transAxes,rotation=0,fontsize=23, va='bottom', ha='center')
+#ax.set_ylabel(r"$\frac{\mathcal{W}_{B}(t)} {  n \omega_B}$",fontsize=23,rotation=0,labelpad=35  )
+#ax.text(-0.090, 0.80, r"$\frac{\mathrm{Tr}[\mathcal{H}_{B free} \hat{\rho}(t)]}{ n \omega_B }$", transform=ax.transAxes,rotation=0,fontsize=23, va='bottom', ha='center')
+ax.set_ylabel(r"$\frac{Energy} {  n \omega_B}$",fontsize=23,rotation=0,labelpad=35  )
+
 ax.set_xlabel(
     r"Spinsystem-size $n$",
     fontsize=20,
