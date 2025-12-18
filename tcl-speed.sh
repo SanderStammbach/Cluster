@@ -34,7 +34,7 @@ export PYTHONUNBUFFERED=1
 source ~/venvs2/qutip/bin/activate
 
 # --- Pfad zu deinem Script ---
-SCRIPT="Tcl4-correlation-giantatom.py"
+SCRIPT="Tcl4-correlation-giantatom-speed.py"
 
 # Empfehlung: einmal Versionsinfo ausgeben
 python - <<'PY'
