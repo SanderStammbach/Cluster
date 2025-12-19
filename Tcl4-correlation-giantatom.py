@@ -11,8 +11,14 @@ hbar=kb=1
 def J(w, w0, lam, Td, gamma0,omega_c, spectrum_form):
     if spectrum_form=="drude-norm":
         return (gamma0 * lam**2) / (2*np.pi * ((w - w0)**2 + lam**2)) * (np.cos(w*Td/2)**2)
-    if spectrum_form=="expo": 
-        return gamma0*np.exp(-(w - w0) / (omega_c)) * (np.cos(w*Td/2)**2)
+    
+    if spectrum_form=="expo":
+        cutoff = np.exp(-(w - w0)/omega_c)
+        cutoff = min(cutoff, 1.0)   # wichtig!
+        return gamma0 * cutoff * (np.cos(w*Td/2)**2)  
+    if spectrum_form=="ohmic":
+        return gamma0*w*np.exp(-w/omega_c)  * (np.cos(w*Td/2)**2)
+    
     if spectrum_form=="drude-under-damped":
         return (gamma0 * lam**2) / (2*np.pi * ((omega_c**2 - w0**2) + lam**2*w**2)) * (np.cos(w*Td/2)**2)
     else:
@@ -47,8 +53,8 @@ def kernel_maker(T, w0, lam, Td, gamma0, omega_c, spectrum_form,
         def im_int(w):
             return -J(w, w0, lam, Td, gamma0, omega_c, spectrum_form) * np.sin(w * tau)
         # beide quad-Aufrufe parallel starten
-        fut_re = pool.submit(quad, re_int, wmin, omega_c, epsabs=epsabs, epsrel=epsrel, limit=limit)
-        fut_im = pool.submit(quad, im_int, wmin, omega_c, epsabs=epsabs, epsrel=epsrel, limit=limit)
+        fut_re = pool.submit(quad, re_int, wmin, np.inf, epsabs=epsabs, epsrel=epsrel, limit=limit)
+        fut_im = pool.submit(quad, im_int, wmin, np.inf, epsabs=epsabs, epsrel=epsrel, limit=limit)
 
         Cr, _ = fut_re.result()
         Ci, _ = fut_im.result()
@@ -56,25 +62,31 @@ def kernel_maker(T, w0, lam, Td, gamma0, omega_c, spectrum_form,
 
     return f
 #Tcl zweiter ordnung: 
-def Kernel2(f, epsabs=1e-8, epsrel=1e-8):
+from scipy.interpolate import interp1d
+
+
+
+
+def Kernel2(f, w0, sign=+1, epsabs=1e-8, epsrel=1e-8):
+    # sign=+1 -> e^{+i w0 tau}  (down)
+    # sign=-1 -> e^{-i w0 tau}  (up)
     pool = ThreadPoolExecutor(max_workers=2)
+
     def B(t):
         t = float(t)
         if t < 0:
             raise ValueError("t must be >= 0")
 
-        def integrand(t1):
-            return f(t - t1)
+        def integrand(tau):
+            return f(tau) * np.exp(1j * sign * w0 * tau)
 
-        def integrand_re(t1):
-            return float(np.real(integrand(t1)))
+        def integrand_re(tau): return float(np.real(integrand(tau)))
+        def integrand_im(tau): return float(np.imag(integrand(tau)))
 
-        def integrand_im(t1):
-            return float(np.imag(integrand(t1)))
-        fut_re_B=pool.submit(quad, integrand_re, 0.0, t, epsabs=epsabs, epsrel=epsrel,limit=100)
-        fut_im_B= pool.submit(quad, integrand_im, 0.0, t, epsabs=epsabs, epsrel=epsrel,limit=100)
-        Bre, _ = fut_re_B.result()
-        Bim, _ = fut_im_B.result()
+        fut_re = pool.submit(quad, integrand_re, 0.0, t, epsabs=epsabs, epsrel=epsrel, limit=400)
+        fut_im = pool.submit(quad, integrand_im, 0.0, t, epsabs=epsabs, epsrel=epsrel, limit=400)
+        Bre, _ = fut_re.result()
+        Bim, _ = fut_im.result()
         return Bre + 1j * Bim
 
     return B
@@ -84,33 +96,51 @@ def Kernel2(f, epsabs=1e-8, epsrel=1e-8):
 
 #TCl vierter ordnung: 
 
-def Kernel4(f, epsabs=1e-6, epsrel=1e-6):
-    pool = ThreadPoolExecutor(max_workers=2)
-    def A(t):
-        t = float(t)
-        if t < 0:
-            raise ValueError("t must be >= 0")
+from scipy.integrate import nquad
+import numpy as np
 
-        def integrand(t3, t2, t1):
-            return f(t - t2) * f(t1 - t3) + f(t - t3) * f(t1 - t2)
+def Kernel4_pm(f_plus, f_minus, epsabs=1e-6, epsrel=1e-6):
+    """
+    Gibt vier getrennte TCL4-Kerne zurück:
+    App, Apm, Amp, Amm
+    sodass A = App + Apm + Amp + Amm (für lineares Bad, Wick/Gauss).
+    """
 
-        def integrand_re(t3, t2, t1):
-            return float(np.real(integrand(t3, t2, t1)))
+    def _A_of(fa, fb):
+        def A(t):
+            t = float(t)
+            if t < 0:
+                raise ValueError("t must be >= 0")
 
-        def integrand_im(t3, t2, t1):
-            return float(np.imag(integrand(t3, t2, t1)))
+            def integrand(t3, t2, t1):
+                #  f -> fa/fb getrennt
+                return fa(t - t2) * fb(t1 - t3) + fa(t - t3) * fb(t1 - t2)
 
-        bounds = [
-            lambda t2, t1: [0.0, t2],   # t3
-            lambda t1:     [0.0, t1],   # t2
-            [0.0, t]                    # t1
-        ]
-        Are, _ = nquad(integrand_re, bounds, opts={"epsabs": epsabs, "epsrel": epsrel})
-        Aim, _ = nquad(integrand_im, bounds, opts={"epsabs": epsabs, "epsrel": epsrel})
+            def integrand_re(t3, t2, t1):
+                return float(np.real(integrand(t3, t2, t1)))
 
-        return Are + 1j * Aim
-    return A
+            def integrand_im(t3, t2, t1):
+                return float(np.imag(integrand(t3, t2, t1)))
 
+            bounds = [
+                lambda t2, t1: [0.0, t2],   # t3
+                lambda t1:     [0.0, t1],   # t2
+                [0.0, t]                    # t1
+            ]
+
+            Are, _ = nquad(integrand_re, bounds, opts={"epsabs": epsabs, "epsrel": epsrel})
+            Aim, _ = nquad(integrand_im, bounds, opts={"epsabs": epsabs, "epsrel": epsrel})
+            return Are + 1j * Aim
+
+        return A
+
+    App = _A_of(f_plus,  f_plus)
+    Apm = _A_of(f_plus,  f_minus)
+    Amp = _A_of(f_minus, f_plus)
+    Amm = _A_of(f_minus, f_minus)
+
+    return App, Apm, Amp, Amm
+"""
 def solver(y, x):
     I = np.zeros_like(y, dtype=complex)
     for i in range(1, len(x)):
@@ -118,74 +148,131 @@ def solver(y, x):
         I[i] = I[i-1] + 0.5 * dx * (y[i] + y[i-1])
     return I
 
+def solve_rho11_population(tlist, Gdown, Gup, rho11_0=1.0):
+    rho = np.zeros_like(tlist, dtype=float)
+    rho[0] = float(rho11_0)
 
+    for k in range(1, len(tlist)):
+        dt = tlist[k] - tlist[k-1]
+        gd = float(Gdown[k-1])
+        gu = float(Gup[k-1])
+
+        rho[k] = rho[k-1] + dt * (-gd * rho[k-1] + gu * (1.0 - rho[k-1]))
+
+        # numerical safety
+        if rho[k] < 0.0: rho[k] = 0.0
+        if rho[k] > 1.0: rho[k] = 1.0
+
+    return rho
     
+"""
+
 
 
 
 if __name__ == "__main__":
-    import qutip as qutip
+    import matplotlib.pyplot as plt
     from qutip import basis, sigmax, sigmaz, brmesolve
-
-    # -------- Badparameter (dein Stil) --------
-    w0      = 3.0
-
-    omega_c = 10.0
-    gamma0  = 0.1
-
-    lam = 1
-    Td = 0.0
- 
-    T = 0.1
-    alpha=1
-
+    # params
+    w0 = 1.0
     omega_c = 10.0 * w0
-    spectrum_form = "expo"
+    gamma0 = 0.1
+    lam = 1.0
+    Td = 1
+    T = 0.5
+    alpha = 1.0
+    spectrum_form = "ohmic"
     rho11_0 = 1.0
-    from concurrent.futures import ThreadPoolExecutor
-    import numpy as np
-
+    tlist = np.linspace(0.0, 10.0, 100)
     f = kernel_maker(T=T, w0=w0, lam=lam, Td=Td, gamma0=gamma0,
-                 omega_c=omega_c, spectrum_form=spectrum_form, wmin=1e-6)
+                     omega_c=omega_c, spectrum_form=spectrum_form, wmin=1e-6)
 
-    B = Kernel2(f)
-    A = Kernel4(f)   # falls du A wirklich willst; sonst auskommentieren
-
-    tlist = np.linspace(0.0, 10.0, 50)
-
-    def compute_B_vals():
-        return np.array([B(float(t)) for t in tlist], dtype=complex)
-
-    def compute_A_vals():
-        return np.array([A(float(t)) for t in tlist], dtype=complex)
-
-    with ThreadPoolExecutor(max_workers=2) as pool2:
-        futB = pool2.submit(compute_B_vals)
-        futA = pool2.submit(compute_A_vals)   # wenn A aus ist: diese Zeile raus
-
-        B_vals = futB.result()
-        A_vals = futA.result()                # wenn A aus ist: diese Zeile raus
+    # build B±
+    # vorher
+    B_plus  = Kernel2(f, w0=w0, sign=+1)
+    B_minus = Kernel2(f, w0=w0, sign=-1)
 
 
 
-    
+    # build f± (needed for TCL4 split)
+    def f_plus(tau):
+        tau = float(tau)
+        if tau < 0:
+            return np.conjugate(f_plus(-tau))
+        return f(tau) * np.exp(1j * w0 * tau)
 
-    # kernen übger tlist berechnen.
-    #B_vals = np.array([B(float(t)) for t in tlist], dtype=complex)
-    #A_vals = np.array([A(float(t)) for t in t_grid], dtype=complex)
+    def f_minus(tau):
+        tau = float(tau)
+        if tau < 0:
+            return np.conjugate(f_minus(-tau))
+        return f(tau) * np.exp(-1j * w0 * tau)
 
-    # time-dependent decay rate for rho11:
-    # rho11(t) = rho11(0) * exp( - ∫_0^t 2 Re[ B(s) + A(s) ] ds )
-    rate = 2.0 * np.real(alpha**2 * B_vals + alpha**4 * A_vals)
-
-    # optional: prevent unphysical growth if instantaneous rate becomes negative
-    rate = np.maximum(rate, 0.0)
-
-    Irate = solver(rate.astype(complex), tlist)  # integral of rate
-    rho11 = rho11_0 * np.exp(-np.real(Irate))
-
+    # build TCL4 kernels
+    #App, Apm, Amp, Amm = Kernel4_pm(f_plus, f_minus)
 
     
+
+    # compute B± and A-terms
+    def compute_Bp(): return np.array([B_plus(float(t))  for t in tlist], dtype=complex)
+    def compute_Bm(): return np.array([B_minus(float(t)) for t in tlist], dtype=complex)
+
+    # TCL4 is expensive: compute only if you really want it
+    def compute_App(): return np.array([App(float(t)) for t in tlist], dtype=complex)
+    def compute_Apm(): return np.array([Apm(float(t)) for t in tlist], dtype=complex)
+    def compute_Amp(): return np.array([Amp(float(t)) for t in tlist], dtype=complex)
+    def compute_Amm(): return np.array([Amm(float(t)) for t in tlist], dtype=complex)
+
+    with ThreadPoolExecutor(max_workers=6) as pool:
+        futBp  = pool.submit(compute_Bp)
+        futBm  = pool.submit(compute_Bm)
+
+        #futApp = pool.submit(compute_App)
+        #futApm = pool.submit(compute_Apm)
+        #futAmp = pool.submit(compute_Amp)
+        #futAmm = pool.submit(compute_Amm)
+
+        Bp_vals  = futBp.result()
+        Bm_vals  = futBm.result()
+        #App_vals = futApp.result()
+        #Apm_vals = futApm.result()
+        #Amp_vals = futAmp.result()
+        #Amm_vals = futAmm.result()
+
+    # mapping to "down/up" for TCL4 (minimal consistent choice):
+    #A_down = App_vals + Apm_vals   # fa = f_plus
+    #A_up   = Amm_vals + Amp_vals   # fa = f_minus
+
+    # rates including TCL2 + TCL4
+    Gdown = 2.0 * np.real(alpha**2 * Bp_vals )#+ alpha**4 * A_down)
+    Gup   = 2.0 * np.real(alpha**2 * Bm_vals )#+ alpha**4 * A_up)
+    from scipy.interpolate import PchipInterpolator
+    gd = PchipInterpolator(tlist, Gdown, extrapolate=True)
+    gu = PchipInterpolator(tlist, Gup,   extrapolate=True)
+
+    # avoid negative instantaneous rates (numerical safeguard)
+    #Gdown = np.maximum(Gdown, 0.0)
+    #Gup   = np.maximum(Gup, 0.0)
+
+    # thermalising rho11(t)
+    from scipy.integrate import solve_ivp
+    from scipy.interpolate import interp1d
+
+    #gd = interp1d(tlist, Gdown, kind="cubic", fill_value="extrapolate")
+    #gu = interp1d(tlist, Gup,   kind="cubic", fill_value="extrapolate")
+
+    def rhs(t, y):
+        r = y[0]
+        return [-gd(t)*r + gu(t)*(1.0 - r)]
+
+    sol = solve_ivp(rhs, (tlist[0], tlist[-1]), [rho11_0], t_eval=tlist, rtol=1e-8, atol=1e-10)
+    rho11 = sol.y[0]
+
+
+    #rho11 = solve_rho11_population(tlist, Gdown, Gup, rho11_0=rho11_0)
+
+
+
+    import qutip as qutip
 
     # Kopplungsoperator (z.B. σx für Relaxation zwischen Eigenzuständen)
     P00 = qutip.basis(2, 0) * qutip.basis(2, 0).dag()
@@ -193,7 +280,7 @@ if __name__ == "__main__":
     P01 = qutip.basis(2, 0) * qutip.basis(2, 1).dag()   # sigma_-
     P10 = qutip.basis(2, 1) * qutip.basis(2, 0).dag()   # sigma_+
     sigma_x = P01 + P10
-    
+    H    = w0 * P11
     # Anfangszustand: excited state |1>
     rho0 = basis(2, 1) * basis(2, 1).dag()
 
@@ -209,35 +296,22 @@ if __name__ == "__main__":
 
 # QuTiP-kompatibel: S(omega, args)
     def S_not_markov_hot(w):
-        wabs = max(abs(w), 1e-6 )
+        wabs = max(abs(w), 1e-12)
+        Jw = gamma0 * wabs * np.exp(-wabs / omega_c) * (np.cos(w*Td/2)**2) # ohmic exp cutoff, >=0
 
-    # exponentieller Cutoff, bei w0 ~ O(1) in etwa 1 und ansonsten <=1
-        cutoff = np.exp(-(wabs - w0) / (omega_c))
-        cutoff = min(cutoff, 1.0)  # verhindert Verstärkung für w < w0
-
+        nb = nbar(wabs, T)
         if w > 0:
-            return 2*np.pi*gamma0 * (nbar(wabs, T) + 1.0) * cutoff
+            return float(2*np.pi * Jw * (nb + 1.0))    # emission
         elif w < 0:
-            return 2*np.pi*gamma0 * nbar(wabs, T) * cutoff
+            return float(2*np.pi * Jw * nb)            # absorption
         else:
-            return 0.0   # absorption
+            return 0.0
 
-
-# --- setup ---
-
-
-    rho0 = basis(2, 1) * basis(2, 1).dag()
-    P1   = basis(2, 1) * basis(2, 1).dag()
-    H    = w0 * P1
+    
 
 
 
     args = {"w0": w0, "Td": Td, "omega_c": omega_c, "gamma0": gamma0, "T": T}
-
-# Kopplungsoperator
-    
-
-# Debug: prüfen, ob QuTiP wirklich nicht-null Spektrum sieht
 
 
     res_BR = qutip.brmesolve(H, rho0, tlist,a_ops=[[sigma_x,S_not_markov_hot]],e_ops=[P11])
@@ -252,31 +326,29 @@ if __name__ == "__main__":
 
     # plots
     plt.figure(figsize=(7, 4))
-    plt.plot(tlist, np.real(B_vals), label="Re B(t)")
-    #plt.plot(t_grid, np.real(A_vals), label="Re A(t)")
-    plt.xlabel("t")
-    plt.ylabel("kernels")
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
+    plt.plot(tlist, np.real(Bp_vals), label="Re B_plus(t)")
+    plt.plot(tlist, np.real(Bm_vals), label="Re B_minus(t)")
+    plt.xlabel("t"); plt.ylabel("B kernels")
+    plt.legend(); plt.tight_layout(); plt.show()
+
+    #plt.figure(figsize=(7, 4))
+    #plt.plot(tlist, np.real(A_down), label="Re A_down(t)")
+    #plt.plot(tlist, np.real(A_up),   label="Re A_up(t)")
+    #plt.xlabel("t"); plt.ylabel("A kernels")
+    #plt.legend(); plt.tight_layout(); plt.show()
 
     plt.figure(figsize=(7, 4))
-    plt.plot(tlist, rate, label="2 Re(B+A)")
-    plt.xlabel("t")
-    plt.ylabel("rate")
-    plt.legend()
-    plt.tight_layout()
-    plt.show()
+    plt.plot(tlist, Gdown, label="Gamma_down(t)")
+    plt.plot(tlist, Gup,   label="Gamma_up(t)")
+    plt.xlabel("t"); plt.ylabel("rates")
+    plt.legend(); plt.tight_layout(); plt.show()
 
     plt.figure(figsize=(7, 4))
-    plt.plot(tlist, rho11, label="rho11(t)")
-    plt.plot(tlist, rho11_red,label="red",color="red")
-    plt.xlabel("t")
-    plt.ylabel(r"$\rho_{11}(t)$")
-    plt.xlabel("t")
-    plt.ylabel("rho11")
-    plt.legend()
-    plt.tight_layout()
+    plt.plot(tlist, rho11, label="TCL2+TCL4 rho11(t)")
+    plt.plot(tlist, rho11_red, label="BR rho11(t)", color="red")
+    plt.xlabel("t"); plt.ylabel(r"$\rho_{11}(t)$")
+    plt.legend(); plt.tight_layout()
     plt.savefig("TCL.png", dpi=300, bbox_inches="tight")
     plt.show()
+
 
