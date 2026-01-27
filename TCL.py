@@ -153,11 +153,15 @@ def TCLsolve_TCL(
     # 5) TCL4-Kern (optional)
     if use_TCL4:
         if TCL4_builder is None:
-            raise ValueError("use_TCL4=True, aber kein TCL4_builder angegeben")
+            L4_of_t = L4_of_t = build_L_TCL4_time_dependent(L0=L0, A=A, W=W, Iabs=Iabs, K=K, N=N,T=T, w0=w0, lam=lam, Td=Td, gamma0=gamma0, omega_c=omega_c,
+            spectrum_form=spectrum_form,
+            tmax=float(np.max(tlist)),
+            use_secular=use_secular, dw_min=dw_min,
+            sign_convention=sign_convention,
+            ntau=2001)
 
-        L4_of_t = TCL4_builder(
-            L0=L0, A=A, W=W, Iabs=Iabs, K=K, N=N
-        )
+
+    
     else:
         L4_of_t = lambda t, args=None: 0 * L0
 
@@ -484,8 +488,8 @@ def build_L_TCL2_time_dependent(L0, A, W, Iabs, K, N,G,Gc, use_secular=False,dw_
         return build_L_t(t)
 
     return L_of_t
-
-def TCL4(
+"""
+def TCL_C4(
     T, w0, lam, Td, gamma0, omega_c, spectrum_form,
     # numerik für C(tau):
     wmin=1e-3, wmax=100.0, nw=10000,
@@ -535,7 +539,74 @@ def TCL4(
             return np.exp(-1j * Omega * tau)
         else:
             raise ValueError("sign_convention must be 'plus' or 'minus'") 
-        return C, phase
+        
+    
+    return C,phase
+
+
+"""
+
+import numpy as np
+
+def TCL_C4(
+    T, w0, lam, Td, gamma0, omega_c, spectrum_form,
+    wmin=1e-3, wmax=100.0, nw=10000,
+    sign_convention="plus",
+    # --- NEU: τ-Tabellierung ---
+    tmax=10.0,      # max tau, den du brauchst (>= max t0 in TCL4)
+    ntau=2001,      # Anzahl τ-Stützstellen (größer = genauer, langsamer Precompute)
+):
+    beta = 1.0 / float(T)
+
+    def coth(x):
+        x = np.asarray(x, dtype=float)
+        out = np.empty_like(x)
+        small = np.abs(x) < 1e-6
+        out[small] = 1.0 / x[small]
+        out[~small] = 1.0 / np.tanh(x[~small])
+        return out
+
+    # Frequenzgitter + Faktoren einmal
+    wgrid = np.linspace(float(wmin), float(wmax), int(nw))
+    Jvals = J(wgrid, w0, lam, Td, gamma0, omega_c, spectrum_form)
+    cothfac = coth(0.5 * beta * wgrid)
+
+    # ---------- PRECOMPUTE C(tau) auf einem τ-Gitter ----------
+    taus = np.linspace(0.0, float(tmax), int(ntau))
+    Ctab = np.empty_like(taus, dtype=complex)
+
+    # Achtung: das ist der eine "teure" Schritt, aber nur einmal!
+    for n, tau in enumerate(taus):
+        yre = Jvals * cothfac * np.cos(wgrid * tau)
+        yim = -Jvals * np.sin(wgrid * tau)
+        Ctab[n] = np.trapezoid(yre, wgrid) + 1j * np.trapezoid(yim, wgrid)
+
+    dtau = taus[1] - taus[0]
+
+    # ---------- schnelle lineare Interpolation ----------
+    def C(tau):
+        tau = float(tau)
+        if tau <= 0.0:
+            return Ctab[0]
+        if tau >= tmax:
+            # entweder clampen oder Fehler werfen – clamp ist oft ok
+            return Ctab[-1]
+
+        x = tau / dtau
+        i = int(x)
+        a = x - i
+        return (1.0 - a) * Ctab[i] + a * Ctab[i + 1]
+
+    def phase(Omega, tau):
+        Omega = float(Omega); tau = float(tau)
+        if sign_convention == "plus":
+            return np.exp(1j * Omega * tau)
+        elif sign_convention == "minus":
+            return np.exp(-1j * Omega * tau)
+        else:
+            raise ValueError("sign_convention must be 'plus' or 'minus'")
+
+    return C, phase
 
 
 def Convolute_4_3_pairs(C, phase, epsabs=1e-10, epsrel=1e-8, limit=400):
@@ -644,7 +715,14 @@ class K4Pairs:
 
 
         
-def build_L_TCL4_time_dependent(L0, A, W, Iabs, K, N,G,Gc, use_secular=False,dw_min=0.0):
+def build_L_TCL4_time_dependent(
+    L0, A, W, Iabs, K, N,
+    T, w0, lam, Td, gamma0, omega_c, spectrum_form,
+    tmax,
+    use_secular=False, dw_min=0.0, sign_convention="plus",
+    ntau=2001
+):
+
     ...
     
     """
@@ -692,20 +770,42 @@ def build_L_TCL4_time_dependent(L0, A, W, Iabs, K, N,G,Gc, use_secular=False,dw_
     idx_map = {(int(a), int(b)): int(I) for I, a, b in Iabs}
 
     dims = L0.dims
+    """
+    Cbath, phase = TCL_C4(
+    T=T, w0=w0, lam=lam, Td=Td,
+    gamma0=gamma0, omega_c=omega_c,
+    spectrum_form=spectrum_form,
+    sign_convention=sign_convention,
+    )"""
+    Cbath, phase = TCL_C4(
+    T=T, w0=w0, lam=lam, Td=Td, gamma0=gamma0, omega_c=omega_c,
+    spectrum_form=spectrum_form,
+    wmin=1e-3, wmax=100.0, nw=10000,
+    sign_convention=sign_convention,
+    tmax=tmax,
+    ntau=ntau
+    )
+
+
     falten_pairs = Convolute_4_3_pairs(Cbath, phase)
-    Cker, Cf = C4(falten_pairs, W, partA="im", partB="re")
+    K4 = K4Pairs(W, falten_pairs, t_round=4)   # 4 ist ein guter Start
+
+    #Cf = C4(falten_pairs, W)
+
 
 
 # z.B. imaginär × reell
     
+    from functools import lru_cache
 
-    
+
     def build_L_t(t):
         rows = []
         cols = []
         data = []
 
         # optional: secular clustering je (a,b) separat
+        
         for I, a, b in Iabs:
             if use_secular:
                 # finde alle (c,d) mit ähnlicher Frequenz
@@ -718,16 +818,19 @@ def build_L_TCL4_time_dependent(L0, A, W, Iabs, K, N,G,Gc, use_secular=False,dw_
                 elem = 0.0 + 0.0j
 
                 # 1) direkter Term: 1/2 * sum_r A_ac A_db [G_ca(t) + G_db(t)]
-                for r in range(K):
+                for r in range(K): # brauch ich dann wahrscheindlich gar nicht mehr. 
                     for i0 in range(N):
                         for i1 in range(N):
-                            elem += 0.5*2 * ( Cf(0,1,2,3, a,c, b,d)(t))
+                            for i2 in range(N):
+                                elem += 0.5*2 * ( A[0, a, i0] *A[0, i0, i1] *A[0, i1, i2] *A[0, i2, c]*K4.get((a, i2), (i0, c), partA="c", partB="c", pairA=(0,2), pairB=(1,3))(t) #0123 
+                                #+A[0, a, i0] *A[0, i0, i1] *A[0, i1, i2] *A[0, i2, c]*Cf(0,2, 1,3,  a, i1,  i1, c,partA="re",partB="im")(t) #0213
+                                )
 
                 # 2) erster Spur-Term: -1/2 * delta_{b d} * sum_{r,k} A_ak A_kc G_ck(t)
                 if b == d:
                     for r in range(K):
                         for k in range(N):
-                            elem -= 0.5*2 * (
+                            elem -= 0.5*2 * (1
 
                             )
 
@@ -735,7 +838,7 @@ def build_L_TCL4_time_dependent(L0, A, W, Iabs, K, N,G,Gc, use_secular=False,dw_
                 if a == c:
                     for r in range(K):
                         for k in range(N):
-                            elem -= 0.5*2 * (
+                            elem -= 0.5*2 * (1
 
                             )
 
@@ -756,10 +859,18 @@ def build_L_TCL4_time_dependent(L0, A, W, Iabs, K, N,G,Gc, use_secular=False,dw_
         return L0 + R_qobj
 
     # QuTiP-kompatible Signatur (t, args)
+    from functools import lru_cache
+    t_round_L = 3 # 3 oder 4 ist ein guter Start (Tradeoff Speed/Genauigkeit)
+
+    @lru_cache(maxsize=20000)
+    def build_L_t_cached(t_key):
+        return build_L_t(float(t_key))
+
     def L_of_t(t, args=None):
-        return build_L_t(t)
+        return build_L_t_cached(round(float(t), t_round_L))
 
     return L_of_t
+
 
 import qutip as qutip
 P11=qutip.basis(2,1)*qutip.basis(2,1).dag()
@@ -779,15 +890,17 @@ H=w0*P11
 A=P10+P01
 a_ops=[P10+P01]
 e_ops=[P11]
-tlist=np.linspace(0,10,1600)
-resutls=TCLsolve_TCL2(
+tlist=np.linspace(0,10,16)
+resutls = TCLsolve_TCL(
     H, psi0, tlist, a_ops,
     T, w0, lam, Td, gamma0, omega_c, spectrum_form,
     e_ops, c_ops=None,
     options=None,
+    use_TCL4=True,  # <-- wichtig
     use_secular=False, dw_min=0.0,
     sign_convention="plus",
 )
+
 
 
 def nbar(w, T):
