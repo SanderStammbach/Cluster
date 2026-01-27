@@ -225,7 +225,7 @@ def TCL_solve_time_dep(L_of_t, ekets, rho0, tlist, e_ops, options=None):
 def gamma_maker_with_J(
     T, w0, lam, Td, gamma0, omega_c, spectrum_form,
     # numerik für C(tau):
-    wmin=1e-3, wmax=100.0, nw=4000,
+    wmin=1e-3, wmax=12.0, nw=5000,
     # numerik für Γ(t):
     epsabs=1e-10, epsrel=1e-8, limit=1200,
     # Vorzeichenkonvention für Γ:
@@ -469,17 +469,17 @@ P00=qutip.basis(2,0)*qutip.basis(2,0).dag()
 psi0=qutip.basis(2,1)
 rho0=P11
 w0=1
-T=1
+T=0.83
 lam=0.01
-Td=8
-gamma0=0.2
-omega_c=10
+Td=218.978
+gamma0=0.00274
+omega_c=1.2
 spectrum_form="ohmic"
 H=w0*P11
 A=P10+P01
 a_ops=[P10+P01]
 e_ops=[P11]
-tlist=np.linspace(0,17,800)
+tlist=np.linspace(0,250,1800)
 resutls=TCLsolve_TCL2(
     H, psi0, tlist, a_ops,
     T, w0, lam, Td, gamma0, omega_c, spectrum_form,
@@ -550,11 +550,12 @@ print("gespeichert unter:", os.path.join(outdir, fname))
 
 
 print("gespeichert unter:", os.path.join(outdir, fname))
-
+plt.figure(figsize=(10,8))
 plt.plot(resutls.times, pop.real, marker="o")
 plt.plot(tlist, rho11_red, label="BR rho11(t)", color="red")
 plt.xlabel("t")
 plt.ylabel(r"$\langle P_{11} \rangle$")
 plt.title("TCL2 population")
 plt.grid(True)
+plt.savefig('giant.png')
 plt.show()

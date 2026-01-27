@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=TCL4
-#SBATCH --time=48:00:00                 # Laufzeitlimit (medium: bis 1-00:00:00 möglich)
-#SBATCH --partition=long              # fat-node[001-008] sind in medium
+#SBATCH --time=10:00:00                 # Laufzeitlimit (medium: bis 1-00:00:00 möglich)
+#SBATCH --partition=medium              # fat-node[001-008] sind in medium
 #SBATCH --nodes=1
 #SBATCH --ntasks=1                      # EIN Prozess, intern parallelisiert
 #SBATCH --cpus-per-task=36              # 36 CPUs für deinen ProcessPool
@@ -31,7 +31,7 @@ export PYTHONUNBUFFERED=1
 # module load python/3.10
 
 # --- falls du ein venv benutzt ---
-source ~/venvs2/qutip/bin/activate
+source ~/venvs2/qutip311/bin/activate
 
 # --- Pfad zu deinem Script ---
 SCRIPT="TCL_2.py"
