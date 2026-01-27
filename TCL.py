@@ -720,7 +720,7 @@ def build_L_TCL4_time_dependent(
     T, w0, lam, Td, gamma0, omega_c, spectrum_form,
     tmax,
     use_secular=False, dw_min=0.0, sign_convention="plus",
-    ntau=2001
+    ntau=100
 ):
 
     ...
@@ -768,7 +768,7 @@ def build_L_TCL4_time_dependent(
     # (optional, aber praktisch)
     # Falls Iabs schon alle Paare enthält, geht das.
     idx_map = {(int(a), int(b)): int(I) for I, a, b in Iabs}
-
+    W_vec = W[I_a, I_b]     # Länge = len(Iabs), Bohrfrequenz zu jedem (a,b) in Iabs
     dims = L0.dims
     """
     Cbath, phase = TCL_C4(
@@ -780,7 +780,7 @@ def build_L_TCL4_time_dependent(
     Cbath, phase = TCL_C4(
     T=T, w0=w0, lam=lam, Td=Td, gamma0=gamma0, omega_c=omega_c,
     spectrum_form=spectrum_form,
-    wmin=1e-3, wmax=100.0, nw=10000,
+    wmin=1e-3, wmax=100.0, nw=1000,
     sign_convention=sign_convention,
     tmax=tmax,
     ntau=ntau
@@ -809,7 +809,8 @@ def build_L_TCL4_time_dependent(
         for I, a, b in Iabs:
             if use_secular:
                 # finde alle (c,d) mit ähnlicher Frequenz
-                mask = np.abs(W[a, b] - W[I_a, I_b]) < (dw_min / 10.0)
+                wab = W[a, b]  # skalar
+                mask = np.abs(wab - W_vec) < (dw_min / 10.0)
                 Jcds = Iabs[mask]
             else:
                 Jcds = Iabs
@@ -856,7 +857,7 @@ def build_L_TCL4_time_dependent(
         ).tocsr()
 
         R_qobj = Qobj(R_sparse, dims=dims)
-        return L0 + R_qobj
+        return  R_qobj
 
     # QuTiP-kompatible Signatur (t, args)
     from functools import lru_cache
